@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "type": "placeholder",
+  "name": "availability_pulse",
+  "description": "Availability pulse animation - awaiting Agent 5 implementation"
+}

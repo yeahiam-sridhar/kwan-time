@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "type": "placeholder",
+  "name": "event_drag",
+  "description": "Event drag animation - awaiting Agent 5 implementation"
+}

@@ -1,0 +1,95 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/kwan_time/**'
+      - '.github/workflows/flutter-cicd.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/kwan_time/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        working-directory: ./frontend/kwan_time
+        run: flutter pub get
+      
+      - name: Run analysis
+        working-directory: ./frontend/kwan_time
+        run: flutter analyze
+      
+      - name: Run unit tests
+        working-directory: ./frontend/kwan_time
+        run: flutter test --coverage test/unit/
+      
+      - name: Run integration tests
+        working-directory: ./frontend/kwan_time
+        run: flutter test integration_test/ --verbose
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./frontend/kwan_time/coverage/lcov.info
+          flags: flutter
+          fail_ci_if_error: false
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        working-directory: ./frontend/kwan_time
+        run: flutter pub get
+      
+      - name: Build web
+        working-directory: ./frontend/kwan_time
+        run: flutter build web --release
+      
+      - name: Upload web artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: flutter-web-build
+          path: ./frontend/kwan_time/build/web/
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        working-directory: ./frontend/kwan_time
+        run: flutter pub get
+      
+      - name: Run linter
+        working-directory: ./frontend/kwan_time
+        run: flutter pub run custom_lint

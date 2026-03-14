@@ -1,0 +1,178 @@
+name: kwan_time
+description: "KWAN-TIME v2.0 — Ultimate Calendar + BI Dashboard for Professionals"
+publish_to: "none"
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.0.0
+  flutter: ^3.19.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CORE STATE MANAGEMENT & LOCAL STORAGE
+  # ═══════════════════════════════════════════════════════════════════════════
+  riverpod: ^2.4.0
+  flutter_riverpod: ^2.4.0
+  equatable: ^2.0.5
+  rxdart: ^0.28.0
+  freezed_annotation: ^2.4.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  sqflite: ^2.3.2
+  path_provider: ^2.1.3
+  path: ^1.9.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ROUTING
+  # ═══════════════════════════════════════════════════════════════════════════
+  go_router: ^12.0.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NETWORKING & API
+  # ═══════════════════════════════════════════════════════════════════════════
+  dio: ^5.3.0
+  web_socket_channel: ^2.4.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DATA MODEL SERIALIZATION
+  # ═══════════════════════════════════════════════════════════════════════════
+  json_serializable: ^6.7.0
+  json_annotation: ^4.8.0
+  uuid: ^4.3.3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DATE/TIME HANDLING
+  # ═══════════════════════════════════════════════════════════════════════════
+  intl: ^0.19.0
+  timezone: ^0.9.4
+  flutter_timezone: ^5.0.1
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ANIMATIONS & GRAPHICS
+  # ═══════════════════════════════════════════════════════════════════════════
+  rive: ^0.13.0
+  flutter_animate: ^4.5.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # AUDIO
+  # ═══════════════════════════════════════════════════════════════════════════
+  just_audio: ^0.9.36
+  audio_session: ^0.1.21
+  audio_service: ^0.18.11
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NOTIFICATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  firebase_messaging: ^15.2.10
+  firebase_core: ^3.3.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.2.0
+  google_sign_in: ^6.2.1
+  flutter_local_notifications: ^17.0.0
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SENSORS & DEVICE FEATURES
+  # ═══════════════════════════════════════════════════════════════════════════
+  sensors_plus: ^7.0.0
+  permission_handler: ^11.3.1
+  vibration: ^2.0.0
+  speech_to_text: ^7.3.0
+
+  share_plus: ^9.0.0
+  uni_links: ^0.5.1
+  excel: ^4.0.6
+  pdf: ^3.11.1
+  isar: ^3.1.0
+  file_picker: ^8.1.2
+  url_launcher: ^6.3.1
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # UTILITIES
+  # ═══════════════════════════════════════════════════════════════════════════
+  logger: ^2.0.0
+  connectivity_plus: ^7.0.0
+  cached_network_image: ^3.3.1
+  app_links: ^6.1.0
+  timeago: ^3.6.1
+
+  cupertino_icons: ^1.0.0
+
+dependency_overrides:
+  uni_links:
+    path: third_party/uni_links
+  web: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CODE GENERATION
+  # ═══════════════════════════════════════════════════════════════════════════
+  build_runner: ^2.4.0
+  freezed: ^2.4.0
+  riverpod_generator: ^2.3.0
+  mocktail: ^1.0.4
+  fake_cloud_firestore: ^3.0.3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LINTING & FORMATTING
+  # ═══════════════════════════════════════════════════════════════════════════
+  flutter_lints: ^3.0.0
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FLUTTER
+# ═══════════════════════════════════════════════════════════════════════════
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/sounds/
+    # Rive animations
+    - assets/rive/tab_switcher.riv
+    - assets/rive/event_drag.riv
+    - assets/rive/loading_skeleton.riv
+    - assets/rive/availability_pulse.riv
+    - assets/rive/sunlight_sweep.riv
+    - assets/rive/notification_bell.riv
+    - assets/rive/booking_confirmed.riv
+
+    # Sound assets
+    - assets/sounds/event_drop.mp3
+    - assets/sounds/event_create.mp3
+    - assets/sounds/view_toggle.mp3
+    - assets/sounds/booking_confirmed.mp3
+    - assets/sounds/error_shake.mp3
+    - assets/sounds/share_success.mp3
+    - assets/sounds/reminder_chime.mp3
+    - assets/sounds/event_start_ding.mp3
+    - assets/sounds/weekly_chime.mp3
+    - assets/sounds/ambient/morning_bells.mp3
+    - assets/sounds/ambient/focus_hum.mp3
+    - assets/sounds/ambient/evening_calm.mp3
+    - assets/sounds/ambient/deep_night.mp3
+
+    # Icons & images
+    - assets/images/logo.png
+    - assets/images/placeholder.png
+    - assets/data/festivals.json
+# ═══════════════════════════════════════════════════════════════════════════
+# ANDROID NATIVE CONFIG
+# ═══════════════════════════════════════════════════════════════════════════
+
+# See flutter_app/android/app/build.gradle for minSdkVersion = 23
+
+# ═══════════════════════════════════════════════════════════════════════════
+# IOS NATIVE CONFIG
+# ═══════════════════════════════════════════════════════════════════════════
+
+# See ios/Podfile for minimum deployment target = 12.0
+
+
+
+

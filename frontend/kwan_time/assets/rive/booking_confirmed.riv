@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "type": "placeholder",
+  "name": "booking_confirmed",
+  "description": "Booking confirmed animation - awaiting Agent 5 implementation"
+}

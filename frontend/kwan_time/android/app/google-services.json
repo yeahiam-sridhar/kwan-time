@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "888050513735",
+    "project_id": "kwan-time",
+    "storage_bucket": "kwan-time.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888050513735:android:d327e3e84046e7d4b83e62",
+        "android_client_info": {
+          "package_name": "com.example.kwan_time"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "888050513735-8r4hf4tq5cmophjsidd8t9iov50b5a3f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwhG6Z-NxM65nYrd97V4JQMUete8lPLSU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888050513735-8r4hf4tq5cmophjsidd8t9iov50b5a3f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,322 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// KWAN-TIME v2.0 — Month View
+// Agent 6: Classic Calendar View
+//
+// Displays calendar month grid with event cards and drag-and-drop support.
+// ═══════════════════════════════════════════════════════════════════════════
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kwan_time/core/theme/kwan_theme.dart';
+// import '../../providers/calendar_provider.dart'; // TODO: Enable when calendar provider is ready
+
+/// Month view widget — calendar grid with 7 columns (Sun-Sat)
+class MonthView extends ConsumerStatefulWidget {
+  const MonthView({super.key});
+
+  @override
+  ConsumerState<MonthView> createState() => _MonthViewState();
+}
+
+class _MonthViewState extends ConsumerState<MonthView> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Calendar - Month View')),
+      body: const Center(
+        child: Text('Calendar feature coming soon'),
+      ),
+    );
+  }
+}
+}
+
+class _MonthViewState extends ConsumerState<MonthView> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(calendarProvider);
+    final monthStart = state.monthStart;
+    final monthEnd = DateTime(
+      monthStart.year,
+      monthStart.month + 1,
+      1,
+    );
+
+    // Get all days to display (including previous month's trailing days)
+    final firstDayOfMonth = monthStart.weekday;
+    final daysInMonth = monthEnd.difference(monthStart).inDays;
+    final daysInPreviousMonth =
+        DateTime(monthStart.year, monthStart.month, 0).day;
+
+    final startDate = monthStart.subtract(Duration(days: firstDayOfMonth - 1));
+    final daysList = <DateTime>[];
+
+    // Add previous month's trailing days
+    for (var i = 0; i < firstDayOfMonth - 1; i++) {
+      daysList.add(startDate.add(Duration(days: i)));
+    }
+
+    // Add current month's days
+    for (var i = 0; i < daysInMonth; i++) {
+      daysList.add(monthStart.add(Duration(days: i)));
+    }
+
+    // Add next month's leading days to fill grid
+    while (daysList.length % 7 != 0) {
+      daysList.add(monthStart.add(Duration(
+          days: daysInMonth +
+              (daysList.length - daysInMonth - firstDayOfMonth + 1))));
+    }
+
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Column(
+        children: [
+          // Month header with navigation
+          _buildMonthHeader(state),
+          const SizedBox(height: 16),
+
+          // Day names (Sun, Mon, Tue, ...)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                  .map((day) => SizedBox(
+                        width: 48,
+                        child: Text(
+                          day,
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: KwanTheme.textSecondary,
+                                  ),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Calendar grid
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                childAspectRatio: 1,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+              ),
+              itemCount: daysList.length,
+              itemBuilder: (context, index) {
+                final date = daysList[index];
+                final isCurrentMonth = date.month == monthStart.month;
+                final isToday = DateTime.now().day == date.day &&
+                    DateTime.now().month == date.month &&
+                    DateTime.now().year == date.year;
+                final isSelected = state.selectedDate.day == date.day &&
+                    state.selectedDate.month == date.month &&
+                    state.selectedDate.year == date.year;
+
+                final events = state.getEventsForDay(date);
+
+                return GestureDetector(
+                  onTap: () {
+                    ref.read(calendarProvider.notifier).selectDate(date);
+                  },
+                  child: _buildDayCell(
+                    context,
+                    date: date,
+                    isCurrentMonth: isCurrentMonth,
+                    isToday: isToday,
+                    isSelected: isSelected,
+                    eventCount: events.length,
+                    events: events,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMonthHeader(CalendarState state) {
+    final monthName = _getMonthName(state.monthStart.month);
+    final year = state.monthStart.year;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () {
+              ref.read(calendarProvider.notifier).previousMonth();
+            },
+            color: KwanTheme.textPrimary,
+          ),
+          Text(
+            '$monthName $year',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () {
+              ref.read(calendarProvider.notifier).nextMonth();
+            },
+            color: KwanTheme.textPrimary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDayCell({
+    required BuildContext context,
+    required DateTime date,
+    required bool isCurrentMonth,
+    required bool isToday,
+    required bool isSelected,
+    required int eventCount,
+    required List<EventInterface> events,
+  }) =>
+      Container(
+        decoration: BoxDecoration(
+          color: isToday
+              ? KwanTheme.colorOnline.withOpacity(0.1)
+              : isSelected
+                  ? KwanTheme.darkCard
+                  : KwanTheme.darkBg,
+          border: Border.all(
+            color: isToday
+                ? KwanTheme.colorOnline.withOpacity(0.3)
+                : isSelected
+                    ? KwanTheme.textPrimary.withOpacity(0.2)
+                    : Colors.transparent,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Stack(
+          children: [
+            // Date number
+            Positioned(
+              top: 4,
+              left: 4,
+              child: Text(
+                '${date.day}',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: isCurrentMonth
+                          ? KwanTheme.textPrimary
+                          : KwanTheme.textSecondary,
+                      fontWeight: isToday ? FontWeight.bold : FontWeight.w400,
+                    ),
+              ),
+            ),
+
+            // Event count indicator
+            if (eventCount > 0)
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: _getEventColorSample(events),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Center(
+                    child: Text(
+                      eventCount > 9 ? '9+' : '$eventCount',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.black87,
+                            fontSize: 10,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // Event dots (up to 3 visible)
+            if (eventCount > 0)
+              Positioned(
+                bottom: 24,
+                left: 4,
+                right: 4,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: events
+                      .take(3)
+                      .map((event) => Container(
+                            width: 4,
+                            height: 4,
+                            margin: const EdgeInsets.only(right: 2),
+                            decoration: BoxDecoration(
+                              color: _getEventColor(event),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+          ],
+        ),
+      );
+
+  String _getMonthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return months[month - 1];
+  }
+
+  Color _getEventColor(EventInterface event) {
+    // Map event type to color using EventColors
+    switch (event.type) {
+      case 'online':
+        return KwanTheme.colorOnline;
+      case 'in_person':
+        return KwanTheme.colorInPerson;
+      default:
+        return KwanTheme.colorBooked;
+    }
+  }
+
+  Color _getEventColorSample(List<EventInterface> events) {
+    if (events.isEmpty) return KwanTheme.colorBooked;
+    return _getEventColor(events[0]);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
