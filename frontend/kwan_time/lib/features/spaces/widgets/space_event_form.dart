@@ -44,7 +44,11 @@ class _SpaceEventFormState extends ConsumerState<SpaceEventForm> {
   late DateTime _startTime;
   late DateTime _endTime;
   String _selectedColor = _colors.first;
-  int? _reminder;
+  int? _reminder;        // null = at event start time (0 min before)
+  bool _useCustom = false;
+  int _customDays = 0;
+  int _customHours = 0;
+  int _customMins = 5;
   bool _isSaving = false;
   String? _errorMsg;
 
@@ -168,20 +172,9 @@ class _SpaceEventFormState extends ConsumerState<SpaceEventForm> {
                 }).toList(),
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<int?>(
-                value: _reminder,
-                dropdownColor: const Color(0xFF162347),
-                decoration: _inputDecoration('Reminder'),
-                items: const [
-                  DropdownMenuItem<int?>(value: null, child: Text('None')),
-                  DropdownMenuItem<int?>(value: 5, child: Text('5 min')),
-                  DropdownMenuItem<int?>(value: 10, child: Text('10 min')),
-                  DropdownMenuItem<int?>(value: 30, child: Text('30 min')),
-                  DropdownMenuItem<int?>(value: 60, child: Text('1 hour')),
-                ],
-                onChanged: (value) => setState(() => _reminder = value),
-                style: const TextStyle(color: Colors.white),
-                iconEnabledColor: Colors.white70,
+              _ReminderPicker(
+                selectedMinutes: _reminder,
+                onChanged: (minutes) => setState(() => _reminder = minutes),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -383,7 +376,8 @@ class _SpaceEventFormState extends ConsumerState<SpaceEventForm> {
         createdByName: userName,
         createdAt: widget.existingEvent?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
-        reminderMinutes: _reminder == null ? [] : [_reminder!],
+        // null _reminder means "at event time" = 0 minutes before
+        reminderMinutes: _reminder == null ? [0] : [_reminder!],
         colorHex: _selectedColor,
         commentCount: widget.existingEvent?.commentCount ?? 0,
       );
@@ -479,5 +473,208 @@ class _ActionField extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Preset + custom reminder picker for space events.
+class _ReminderPicker extends StatefulWidget {
+  final int? selectedMinutes;
+  final void Function(int?) onChanged;
+  const _ReminderPicker({
+    required this.selectedMinutes,
+    required this.onChanged,
+  });
+
+  @override
+  State<_ReminderPicker> createState() => _ReminderPickerState();
+}
+
+class _ReminderPickerState extends State<_ReminderPicker> {
+  // -1 = custom sentinel
+  static const _presets = <int?>[null, 1, 5, 10, 30, 60, 1440, -1];
+
+  static String _label(int? v) => switch (v) {
+        null => 'At event time',
+        1 => '1 min before',
+        5 => '5 min before',
+        10 => '10 min before',
+        30 => '30 min before',
+        60 => '1 hour before',
+        1440 => '1 day before',
+        _ => 'Custom',
+      };
+
+  int? get _dropdownValue {
+    final m = widget.selectedMinutes;
+    if (m == null) return null;
+    if (_presets.contains(m)) return m;
+    return -1; // custom
+  }
+
+  void _openCustomPicker() {
+    int days = 0, hours = 0, mins = 5;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlg) => AlertDialog(
+          backgroundColor: const Color(0xFF162347),
+          title: const Text(
+            'Custom reminder',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            _StepRow(
+              label: 'Days',
+              value: days,
+              onInc: () => setDlg(() => days++),
+              onDec: () => setDlg(() {
+                if (days > 0) days--;
+              }),
+            ),
+            const SizedBox(height: 12),
+            _StepRow(
+              label: 'Hours',
+              value: hours,
+              onInc: () => setDlg(() {
+                if (hours < 23) hours++;
+              }),
+              onDec: () => setDlg(() {
+                if (hours > 0) hours--;
+              }),
+            ),
+            const SizedBox(height: 12),
+            _StepRow(
+              label: 'Minutes',
+              value: mins,
+              onInc: () => setDlg(() {
+                if (mins < 59) mins++;
+              }),
+              onDec: () => setDlg(() {
+                if (mins > 0) mins--;
+              }),
+            ),
+          ]),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white54),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1565C0),
+              ),
+              onPressed: () {
+                final total = days * 1440 + hours * 60 + mins;
+                // Clamp to 0 (fire at event time)
+                widget.onChanged(total <= 0 ? null : total);
+                Navigator.pop(ctx);
+              },
+              child: const Text('Set'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<int?>(
+      value: _dropdownValue,
+      dropdownColor: const Color(0xFF162347),
+      decoration: InputDecoration(
+        labelText: 'Reminder',
+        labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.12)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1565C0)),
+        ),
+      ),
+      items: _presets
+          .map(
+            (v) => DropdownMenuItem<int?>(
+              value: v,
+              child: Text(
+                _label(v),
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          )
+          .toList(),
+      onChanged: (v) {
+        if (v == -1) {
+          _openCustomPicker();
+        } else {
+          widget.onChanged(v);
+        }
+      },
+      style: const TextStyle(color: Colors.white),
+      iconEnabledColor: Colors.white70,
+    );
+  }
+}
+
+class _StepRow extends StatelessWidget {
+  final String label;
+  final int value;
+  final VoidCallback onInc;
+  final VoidCallback onDec;
+  const _StepRow({
+    required this.label,
+    required this.value,
+    required this.onInc,
+    required this.onDec,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      SizedBox(
+        width: 70,
+        child: Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+      ),
+      IconButton(
+        icon: const Icon(
+          Icons.remove_circle_outline,
+          color: Colors.white70,
+          size: 22,
+        ),
+        onPressed: onDec,
+      ),
+      SizedBox(
+        width: 32,
+        child: Text(
+          '$value',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      IconButton(
+        icon: const Icon(
+          Icons.add_circle_outline,
+          color: Colors.white70,
+          size: 22,
+        ),
+        onPressed: onInc,
+      ),
+    ]);
   }
 }

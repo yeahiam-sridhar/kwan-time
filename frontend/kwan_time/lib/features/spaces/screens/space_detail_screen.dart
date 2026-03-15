@@ -9,7 +9,6 @@ import '../models/space_model.dart';
 import '../providers/space_calendar_provider.dart';
 import '../providers/space_providers.dart';
 import '../services/role_permission_service.dart';
-import '../services/space_notification_service.dart';
 import '../widgets/space_calendar_view.dart';
 import '../widgets/space_event_detail_sheet.dart';
 import '../widgets/space_event_form.dart';
@@ -81,15 +80,6 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_active_outlined,
-              color: Colors.white,
-            ),
-            tooltip: 'Test notification',
-            onPressed: () =>
-                SpaceNotificationService.instance.sendTestNotification(),
-          ),
           SpaceManagementMenu(space: liveSpace),
         ],
       ),

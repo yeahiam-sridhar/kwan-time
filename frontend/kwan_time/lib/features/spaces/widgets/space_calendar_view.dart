@@ -138,7 +138,7 @@ class _SpaceCalendarViewState extends ConsumerState<SpaceCalendarView>
 
         // ── Month grid ───────────────────────────────────────────────
         SizedBox(
-          height: 260,
+          height: 300,
           child: PageView.builder(
             controller: _pageCtrl,
             onPageChanged: _onPageChanged,
@@ -209,20 +209,20 @@ class _MonthGrid extends ConsumerWidget {
     final rows = (totalCells / 7).ceil();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(
           rows,
           (row) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 1),
+            padding: const EdgeInsets.symmetric(vertical: 3),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(7, (col) {
                 final cell = row * 7 + col;
                 final dayNum = cell - startOffset + 1;
                 if (dayNum < 1 || dayNum > daysInMonth) {
-                  return const SizedBox(width: 36, height: 36);
+                  return const SizedBox(width: 40, height: 40);
                 }
                 final date = DateTime(month.year, month.month, dayNum);
                 final isToday = date.year == today.year &&
@@ -322,8 +322,8 @@ class _DayCellState extends State<_DayCell> with SingleTickerProviderStateMixin 
         animation: _tap,
         builder: (_, child) => Transform.scale(scale: _tap.value, child: child),
         child: SizedBox(
-          width: 36,
-          height: 36,
+          width: 40,
+          height: 40,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -344,7 +344,7 @@ class _DayCellState extends State<_DayCell> with SingleTickerProviderStateMixin 
                 '${widget.day}',
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 13,
+                  fontSize: 15,
                   fontWeight: widget.isToday || widget.isSelected
                       ? FontWeight.w800
                       : FontWeight.w500,
